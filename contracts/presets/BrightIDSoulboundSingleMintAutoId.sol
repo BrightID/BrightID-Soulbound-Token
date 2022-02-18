@@ -38,6 +38,10 @@ contract BrightIDSoulboundSingleMintAutoId is BrightIDSoulboundEnumerable {
             balance += BrightIDSoulbound.balanceOf(_uuidToAddress[hashUUID(contextIds[i])]);
         }
         require(balance == 0, "BrightIDSoulboundSingleMintAutoId: This BrightID had minted");
+        require(
+            _uuidToAddress[hashUUID(contextIds[0])] != address(0),
+            "BrightIDSoulboundSingleMintAutoId: UUID not bound"
+        );
         _safeMint(_uuidToAddress[hashUUID(contextIds[0])], _tokenIdTracker.current());
         _tokenIdTracker.increment();
     }
