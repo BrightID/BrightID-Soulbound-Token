@@ -21,3 +21,7 @@ Note that this is only a PROOF OF CONCEPT, security issues not related to Bright
 - UUID ownership based implementation
   - Requires more steps for validation
   - UUID ownership proved with ETH signature
+
+## Note
+
+- All token contracts should be compatible with sites that support ERC-721, though the contract themselves do not actually implement all methods in ERC-721, due to the removal of the approval mechanic used by regular ERC-721 contracts. This was done to save gas on contract deployment as no unnecessary persistent storage would be wasted. Also the deployed bytecode size should be smaller thanks to the removal of functions instead of empty implementations.
