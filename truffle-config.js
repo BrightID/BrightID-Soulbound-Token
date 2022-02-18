@@ -10,6 +10,15 @@ module.exports = {
       network_id: 4,
       gas: 29000000,
       confirmations: 2
+    },
+    gnosis: {
+      provider: () => new HDWalletProvider(
+        `${process.env.DEPLOYER_PRIVATE_KEY}`, `https://poa-xdai.gateway.pokt.network/v1/lb/${process.env.PORTAL_KEY}`),
+      network_id: 100,
+      gas: 29000000,
+      gasPrice: 1000000000,
+      confirmations: 2,
+      networkCheckTimeout: 10000000
     }
   },
 
@@ -24,7 +33,7 @@ module.exports = {
       },
     },
   },
-  
+
   plugins: [
     'truffle-plugin-stdjsonin'
   ]
