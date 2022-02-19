@@ -11,14 +11,9 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "./brightid/extensions/BrightIDValidatorOwnership.sol";
 
-contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
+contract BrightIDSoulbound is Context, ERC165, IERC721, BrightIDValidatorOwnership {
     using Address for address;
     using Strings for uint256;
-
-    /**
-     * @dev Emitted when `tokenId` token is transferred from `from` to `to`.
-     */
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
     // Token name
     string private _name;
@@ -81,7 +76,7 @@ contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
         return
             interfaceId == type(IERC721).interfaceId ||
             interfaceId == type(IERC721Metadata).interfaceId ||
@@ -127,6 +122,68 @@ contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
 
         string memory baseURI = _baseURI();
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
+    }
+
+    /**
+     * @dev See {IERC721-approve}.
+     */
+    function approve(address, uint256) public virtual override {
+        revert("BrightIDSoulbound: approval mechanic disabled");
+    }
+
+    /**
+     * @dev See {IERC721-getApproved}.
+     */
+    function getApproved(uint256) public view virtual override returns (address) {
+        return address(0);
+    }
+
+    /**
+     * @dev See {IERC721-setApprovalForAll}.
+     */
+    function setApprovalForAll(address, bool) public virtual override {
+        revert("BrightIDSoulbound: approval mechanic disabled");
+    }
+
+    /**
+     * @dev See {IERC721-isApprovedForAll}.
+     */
+    function isApprovedForAll(address, address) public view virtual override returns (bool) {
+        return false;
+    }
+
+    /**
+     * @dev See {IERC721-transferFrom}.
+     */
+    function transferFrom(
+        address,
+        address,
+        uint256
+    ) public virtual override {
+        revert("BrightIDSoulbound: regular transfer disabled");
+    }
+
+    /**
+     * @dev See {IERC721-safeTransferFrom}.
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        safeTransferFrom(from, to, tokenId, "");
+    }
+
+    /**
+     * @dev See {IERC721-safeTransferFrom}.
+     */
+    function safeTransferFrom(
+        address,
+        address,
+        uint256,
+        bytes memory
+    ) public virtual override {
+        revert("BrightIDSoulbound: regular transfer disabled");
     }
 
     /**

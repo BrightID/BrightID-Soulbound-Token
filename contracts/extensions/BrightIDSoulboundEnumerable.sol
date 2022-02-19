@@ -4,7 +4,7 @@ pragma solidity ^0.8.11;
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import "../BrightIDSoulbound.sol";
 
-abstract contract BrightIDSoulboundEnumerable is BrightIDSoulbound {
+abstract contract BrightIDSoulboundEnumerable is BrightIDSoulbound, IERC721Enumerable {
     // Mapping from owner to list of owned token IDs
     mapping(address => mapping(uint256 => uint256)) private _ownedTokens;
 
@@ -20,7 +20,13 @@ abstract contract BrightIDSoulboundEnumerable is BrightIDSoulbound {
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(IERC165, BrightIDSoulbound)
+        returns (bool)
+    {
         return interfaceId == type(IERC721Enumerable).interfaceId || super.supportsInterface(interfaceId);
     }
 
