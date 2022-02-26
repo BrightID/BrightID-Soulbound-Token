@@ -10,6 +10,11 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 contract BrightIDValidatorOwnership is BrightIDValidatorBase {
     using ECDSA for bytes32;
 
+    /**
+     * @dev Emitted when `addr` is bound.
+     */
+    event AddressBound(address indexed addr);
+
     // Mapping keccak(UUID) to address
     mapping(bytes32 => address) internal _uuidToAddress;
 
@@ -39,6 +44,7 @@ contract BrightIDValidatorOwnership is BrightIDValidatorBase {
         address signer = getUUIDHash(owner, uuidHash, nonce).toEthSignedMessageHash().recover(signature);
         require(signer != address(0) && signer == owner, "BrightIDValidatorOwnership: Signature invalid");
         _uuidToAddress[uuidHash] = owner;
+        emit AddressBound(owner);
     }
 
     /**
