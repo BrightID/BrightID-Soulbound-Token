@@ -41,4 +41,19 @@ contract BrightIDSoulboundSingleMintAutoId is BrightIDSoulboundEnumerable {
         _safeMint(_uuidToAddress[hashUUID(contextIds[0])], _tokenIdTracker.current());
         _tokenIdTracker.increment();
     }
+
+    /**
+     * @dev See {BrightIDValidatorOwnership-bind}.
+     * A temporary safe version of {BrightIDValidatorOwnership-bind},
+     * it fixes the issue by preventing binding to an address that currently owns a token.
+     */
+    function bind(
+        address owner,
+        bytes32 uuidHash,
+        uint256 nonce,
+        bytes calldata signature
+    ) public override {
+        super.bind(owner, uuidHash, nonce, signature);
+        require(balanceOf(owner) == 0, "BrightIDSoulboundSingleMintAutoId: Address currently in use");
+    }
 }

@@ -22,6 +22,9 @@ contract BrightIDValidatorOwnership is BrightIDValidatorBase {
 
     /**
      * @dev Bind an UUID to an address.
+     * This function is currently unsafe because an attacker may
+     * bind a compromised address to a context id linked to their BrightID.
+     * See {BrightIDSoulboundSingleMintAutoId-bind} for a temporary fix.
      *
      * Requirements:
      *
@@ -39,7 +42,7 @@ contract BrightIDValidatorOwnership is BrightIDValidatorBase {
         bytes32 uuidHash,
         uint256 nonce,
         bytes calldata signature
-    ) external {
+    ) public virtual {
         require(_uuidToAddress[uuidHash] == address(0), "BrightIDValidatorOwnership: UUID already bound");
         address signer = getUUIDHash(owner, uuidHash, nonce).toEthSignedMessageHash().recover(signature);
         require(signer != address(0) && signer == owner, "BrightIDValidatorOwnership: Signature invalid");
