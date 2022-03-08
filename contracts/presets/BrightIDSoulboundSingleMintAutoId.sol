@@ -2,9 +2,9 @@
 pragma solidity ^0.8.11;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "../extensions/BrightIDSoulboundEnumerable.sol";
+import "../BrightIDSoulbound.sol";
 
-contract BrightIDSoulboundSingleMintAutoId is BrightIDSoulboundEnumerable {
+contract BrightIDSoulboundSingleMintAutoId is BrightIDSoulbound {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdTracker;
@@ -55,5 +55,9 @@ contract BrightIDSoulboundSingleMintAutoId is BrightIDSoulboundEnumerable {
     ) public override {
         super.bind(owner, uuidHash, nonce, signature);
         require(balanceOf(owner) == 0, "BrightIDSoulboundSingleMintAutoId: Address currently in use");
+    }
+
+    function totalSupply() public view virtual returns (uint256) {
+        return _tokenIdTracker.current();
     }
 }
