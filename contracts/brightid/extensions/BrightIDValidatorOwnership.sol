@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.11;
 
-import "./../BrightIDValidatorBase.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "./../validator/BrightIDValidatorSingle.sol";
 
 /**
- * @dev UUID based implementation of {BrightIDValidatorBase}.
+ * @dev UUID based implementation of {BrightIDValidatorSingle}.
  */
-contract BrightIDValidatorOwnership is BrightIDValidatorBase {
+contract BrightIDValidatorOwnership is BrightIDValidatorSingle {
     using ECDSA for bytes32;
 
     /**
@@ -18,7 +18,7 @@ contract BrightIDValidatorOwnership is BrightIDValidatorBase {
     // Mapping keccak(UUID) to address
     mapping(bytes32 => address) internal _uuidToAddress;
 
-    constructor(address verifier, bytes32 context) BrightIDValidatorBase(verifier, context) {}
+    constructor(address verifier_, bytes32 context_) BrightIDValidatorSingle(verifier_, context_) {}
 
     /**
      * @dev Bind an UUID to an address.
@@ -45,7 +45,7 @@ contract BrightIDValidatorOwnership is BrightIDValidatorBase {
     ) public virtual {
         require(_uuidToAddress[uuidHash] == address(0), "BrightIDValidatorOwnership: UUID already bound");
         address signer = getUUIDHash(owner, uuidHash, nonce).toEthSignedMessageHash().recover(signature);
-        require(signer != address(0) && signer == owner, "BrightIDValidatorOwnership: Signature invalid");
+        require(signer != address(0) && isTrustedValidator(signer), "BrightIDValidatorOwnership: Signature invalid");
         _uuidToAddress[uuidHash] = owner;
         emit AddressBound(owner);
     }
@@ -72,5 +72,24 @@ contract BrightIDValidatorOwnership is BrightIDValidatorBase {
         uint256 nonce
     ) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(owner, uuidHash, nonce));
+    }
+
+    /**
+     * @dev Validate signed BrightID verification data.
+     *
+     * Requirements:
+     *
+     * - signer of signature must be a trusted validator.
+     */
+    function _validate(
+        bytes32[] calldata contextIds,
+        uint256 timestamp,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal view {
+        bytes32 message = keccak256(abi.encodePacked(context(), contextIds, timestamp));
+        address signer = message.recover(v, r, s);
+        require(isTrustedValidator(signer), "BrightIDValidatorOwnership: Signer not authorized");
     }
 }
