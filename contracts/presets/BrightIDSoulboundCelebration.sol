@@ -2,9 +2,10 @@
 pragma solidity ^0.8.11;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../BrightIDSoulbound.sol";
 
-contract BrightIDSoulboundSingleMintAutoId is BrightIDSoulbound {
+contract BrightIDSoulboundCelebration is BrightIDSoulbound, ReentrancyGuard {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdTracker;
@@ -31,13 +32,14 @@ contract BrightIDSoulboundSingleMintAutoId is BrightIDSoulbound {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external {
+    ) external nonReentrant {
+        require(_tokenIdTracker.current() < 10000, "BrightIDSoulboundCelebration: Limit reached");
         _validate(contextIds, timestamp, v, r, s);
         uint256 balance;
         for (uint256 i = 0; i < contextIds.length; i++) {
             balance += BrightIDSoulbound.balanceOf(_uuidToAddress[hashUUID(contextIds[i])]);
         }
-        require(balance == 0, "BrightIDSoulboundSingleMintAutoId: This BrightID had minted");
+        require(balance == 0, "BrightIDSoulboundCelebration: This BrightID had minted");
         _safeMint(_uuidToAddress[hashUUID(contextIds[0])], _tokenIdTracker.current());
         _tokenIdTracker.increment();
     }
@@ -54,10 +56,14 @@ contract BrightIDSoulboundSingleMintAutoId is BrightIDSoulbound {
         bytes calldata signature
     ) public override {
         super.bind(owner, uuidHash, nonce, signature);
-        require(balanceOf(owner) == 0, "BrightIDSoulboundSingleMintAutoId: Address currently in use");
+        require(balanceOf(owner) == 0, "BrightIDSoulboundCelebration: Address currently in use");
     }
 
     function totalSupply() public view virtual returns (uint256) {
         return _tokenIdTracker.current();
+    }
+
+    function tokenURI(uint256) public pure override returns (string memory) {
+        return "ipfs://QmcFUUnGkURUi1Q97pDvmUaG8QwcdzqzqUm6oxxikWbkyE/1.json";
     }
 }
