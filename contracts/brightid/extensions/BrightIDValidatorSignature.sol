@@ -9,25 +9,22 @@ import "./../validator/BrightIDValidatorSingle.sol";
  */
 contract BrightIDValidatorSignature is BrightIDValidatorSingle {
     using ECDSA for bytes32;
-    using ECDSA for bytes;
 
-    bytes private _messageToSign;
-    bytes32 private _messageHash;
+    bytes private _soulboundMessage;
 
     constructor(
         address verifier_,
         bytes32 context_,
-        bytes memory messageToSign_
+        bytes memory soulboundMessage_
     ) BrightIDValidatorSingle(verifier_, context_) {
-        _messageToSign = messageToSign_;
-        _messageHash = messageToSign_.toEthSignedMessageHash();
+        _soulboundMessage = soulboundMessage_;
     }
 
     /**
-     * @dev Returns the message to be signed.
+     * @dev Returns the soulbound message.
      */
-    function messageToSign() public view virtual returns (string memory) {
-        return string(_messageToSign);
+    function soulboundMessage() public view virtual returns (string memory) {
+        return string(_soulboundMessage);
     }
 
     /**
@@ -47,18 +44,5 @@ contract BrightIDValidatorSignature is BrightIDValidatorSingle {
         bytes32 message = keccak256(abi.encodePacked(context(), contextIds, timestamp));
         address signer = message.recover(v, r, s);
         require(isTrustedValidator(signer), "BrightIDValidatorSignature: Signer not authorized");
-    }
-
-    function _recoverAll(bytes calldata contextIds) internal view virtual returns (address[] memory) {
-        uint256 length = contextIds.length / 65;
-        address[] memory members = new address[](length);
-        for (uint256 i = 0; i < length; i++) {
-            members[i] = _messageHash.recover(contextIds[i * 65:(i + 1) * 65]);
-        }
-        return members;
-    }
-
-    function _recoverAt(bytes calldata contextIds, uint256 index) internal view virtual returns (address) {
-        return _messageHash.recover(contextIds[index * 65:(index + 1) * 65]);
     }
 }
